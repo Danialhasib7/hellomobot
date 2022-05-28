@@ -30,7 +30,7 @@ from googletrans import Translator
  
 bot = Bot("AppName", auth="iksuphozhosuylowguopxuhntfvinccm")
 
-target = "g0BWelu0b8fb490ec311c8992e309887"
+target = "g0uia80bb4208009b4e5f79897f60387"
 
 channell = "c0zJzy0e2c6e5793fd68f54ec777cda4"
 
