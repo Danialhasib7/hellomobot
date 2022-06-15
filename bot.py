@@ -1192,7 +1192,7 @@ message_id=msg.get("message_id"))
 								bot.sendMessage(target, response,message_id=msg.get("message_id"))
 							except:
 								bot.sendMessage(target, "متاسفانه تو ارسال مشکلی پیش اومد!", message_id=msg["message_id"])
-							
+								
 						elif msg.get("text").startswith("پ ن پ") or msg.get("text").startswith("!pa_na_pa") or msg.get("text").startswith("په نه په"):
 							try:
 								response = get("http://api.codebazan.ir/jok/pa-na-pa/").text
