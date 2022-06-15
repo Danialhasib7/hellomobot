@@ -73,6 +73,31 @@ def alert(guid,user,link=False):
 		bot.banGroupMember(target, guid)
 		bot.sendMessage(msg.get("author_object_guid"),"متاسفانه شما بدلیل تبلیغات از گروه حذف شدید\nباید قوانین گروه را مطالعه می کردید❗️")
 
+def star(guid,user):
+	stars.append(guid)
+	star_count = int(stars.count(guid))
+	if star_count == 1:
+		bot.sendMessage(target,  f"شما {guil} از طرف مدیر گرامی [1/3] امتیاز دریافت کردید بعد از دریافت 3 امتیاز آدمین گروه می شوید 😍🙌")
+	elif star_count == 2:
+		bot.sendMessage(target,  f"شما {guil} از طرف مدیر گرامی [2/3] امتیاز دریافت کردید بعد از دریافت 3 امتیاز آدمین گروه می شوید 😍🙌")
+	elif star_count == 3:
+		bot.sendMessage(target,  f"شما {guil} از طرف مدیر گرامی [3/3] امتیاز دریافت کردید اکنون آدمین گروه می شوید 🎉😱")
+		bot.setGroupAdmin(target,guid)
+
+
+
+def remove_star(guid,user):
+	stars.remove(guid)
+	remove_count = int(stars.count(guid))
+	if remove_count == 2:
+		bot.sendMessage(target,   f"از طرف مدیر گرامی [1/3] امتیاز از شما {guil} کسر شد بعد از کسر 3 امتیاز از آدمین بودن برکنار می شوید 😔💔")
+	elif remove_count == 1:
+		bot.sendMessage(target,   f"از طرف مدیر گرامی [2/3] امتیاز از شما {guil} کسر شد بعد از کسر 3 امتیاز از آدمین بودن برکنار می شوید 😔💔")
+	elif remove_count == 0:
+		bot.sendMessage(target,   f"از طرف مدیر گرامی [3/3] امتیاز از شما {guil} کسر شد اکنون از آدمینی برکنار می شوید 😭🖤")
+		bot.deleteGroupAdmin(target,user)
+		
+		
 while True:
 	# time.sleep(15)
 	try:
@@ -157,17 +182,26 @@ while True:
 							except:
 								bot.sendMessage(target, "ارسال شد✅", message_id=msg.get("message_id"))
 								
-						elif msg.get("text").startswith("!ban") and msg.get("author_object_guid") in admins :
+						elif msg.get("text").startswith("!ban") or msg.get("text").startswith("بن") and msg.get("author_object_guid") in admins :
 							try:
 								guid = bot.getInfoByUsername(msg.get("text").split(" ")[1][1:])["data"]["chat"]["abs_object"]["object_guid"]
 								if not guid in admins :
 									bot.banGroupMember(target, guid)
 									# bot.sendMessage(target, "✅ کاربر با موفقیت از گروه اخراج شد", message_id=msg.get("message_id"))
+								else :
 									bot.sendMessage(target, "❌ کاربر ادمین میباشد", message_id=msg.get("message_id"))
 									
 							except IndexError:
+								getguidkr = bot.getMessagesInfo(target, [msg.get("reply_to_message_id")])[0]["author_object_guid"]
 								bot.banGroupMember(target, bot.getMessagesInfo(target, [msg.get("reply_to_message_id")])[0]["author_object_guid"])
-								bot.sendMessage(target, "✅ کاربر با موفقیت از گروه اخراج شد", message_id=msg.get("message_id"))
+								user = bot.getUserInfo(getguidkr)["data"]["chat"]["abs_object"]["object_guid"]
+								username = bot.getUserInfo(user)["data"]["user"]["first_name"]
+								bot.forwardMessages(target,[msg.get("reply_to_message_id")],getguidkr)
+								if msg.get('reply_to_message_id') != None:
+									befrest = bot.getMessagesInfo(target, [msg.get('reply_to_message_id')])[0]
+									if befrest['text'] != None:
+										getmtns = befrest['text']
+								bot.sendMessage(getguidkr,  f"کاربر {username} شما به دلیل << {getmtns} >> از گروه حذف و وارد لیست سیاه شدید🗑")
 							except:
 								bot.sendMessage(target, "❌ دستور اشتباه", message_id=msg.get("message_id"))
 
@@ -287,22 +321,28 @@ while True:
 							except:
 								bot.sendMessage(target, "دستور رو اشتباه میزنی🚫😶", message_id=msg.get("message_id"))
 								
-						elif msg.get("text").startswith("!del_alert") or msg.get("text").startswith("!حذف اخطار") :
+						elif msg.get("text").startswith("آزاد") or msg.get("text").startswith("!del_alert") and msg.get("author_object_guid") in admins :
 							try:
-								guid = bot.getInfoByUsername(msg.get("text").split(" ")[1][1:])["data"]["chat"]["object_guid"]
-								if guid in blacklist:
-									if msg.get("author_object_guid") in admins:
-										alerts.remove(guid)
-										alerts.remove(guid)
-										alerts.remove(guid)
-								bot.alerts.remove(target, [guid])
-								bot.sendMessage(target, "✅ اطلاعات اخطار پاک شد ", message_id=msg.get("message_id"))
-
+								guid = bot.getInfoByUsername(msg.get("text").split(" ")[1][1:])["data"]["chat"]["abs_object"]["object_guid"]
+								if not guid in admins :
+									bot.unbanGroupMember(target, guid)
+									linkgroupp = bot.getGroupLink(target)
+									usernamep = bot.getUserInfo(guid)["data"]["user"]["first_name"]
+									bot.sendMessage(target,   f"کاربر {usernamep} با موفقیت آزاد شد", message_id=msg.get("message_id"))
+									bot.sendMessage(guid,   f"کاربر {usernamep} شما با موفقیت از لیست سیاه خارج شدید\nروی لینک کلیک کنید😍❤️👇\n\n {linkgroupp}")
+								else:
+									bot.sendMessage(target, "❌ شما آدمین نمی باشید", message_id=msg.get("message_id"))
+									
 							except IndexError:
-								bot.sendMessage(target, "دستور رو درست بزن 🤌😶", message_id=msg.get("message_id"))
-							
+								linkgroup = bot.getGroupLink(target)
+								gydea = bot.getMessagesInfo(target, [msg.get("reply_to_message_id")])[0]["author_object_guid"]
+								bot.unbanGroupMember(target, bot.getMessagesInfo(target, [msg.get("reply_to_message_id")])[0]["author_object_guid"])
+								user = bot.getUserInfo(gydea)["data"]["chat"]["abs_object"]["object_guid"]
+								username = bot.getUserInfo(user)["data"]["user"]["first_name"]
+								bot.sendMessage(target,   f"کاربر {username} با موفقیت آزاد شد", message_id=msg.get("message_id"))
+								bot.sendMessage(user,   f"کاربر {username} شما با موفقیت از لیست سیاه خارج شدید\nروی لینک کلیک کنید😍❤️👇\n\n {linkgroup}")
 							except:
-								bot.sendMessage(target, "دستور رو اشتباه میزنی🚫😶", message_id=msg.get("message_id"))
+								bot.sendMessage(target, "❌ دستور اشتباه", message_id=msg.get("message_id"))
 												
 						elif msg.get("text") == "!info":
 							try:
@@ -1062,19 +1102,56 @@ message_id=msg.get("message_id"))
 									bot.sendMessage(target,"نتیجه به کانال ارسال شد >•<😶",message_id=msg["message_id"])
 							except:
 								bot.sendMessage(target, "نتیجه به کانال ارسال شد >•<", message_id=msg["message_id"])
-								
-						elif msg.get("text").startswith("!azad") or msg.get("text").startswith("ازاد") and msg.get("author_object_guid") in admins :
+
+						elif msg.get("text").startswith("!star"):
 							try:
-								guid = bot.getInfoByUsername(msg.get("text").split(" ")[1][1:])["data"]["chat"]["abs_object"]["object_guid"]
-								if not guid in admins :
-									bot.unbanGroupMember(target, guid)
-									bot.sendMessage(target, "✅ کاربر مورد نظر با موفقیت آزاد شد", message_id=msg.get("message_id"))
-									# bot.sendMessage(target, "✅ کاربر با موفقیت از گروه اخراج شد", message_id=msg.get("message_id"))
-								else :
-									bot.sendMessage(target, "❌ شما آدمین نمی باشید", message_id=msg.get("message_id"))
+								user = msg.get("text").split(" ")[1][1:]
+								guid = bot.getInfoByUsername(user)["data"]["chat"]["abs_object"]["object_guid"]
+								guil = bot.getInfoByUsername(user)["data"]["user"]["first_name"]
+								star(guid,user)
 							except:
-								print("err unpin")
-								
+								try:
+									guid = bot.getMessagesInfo(target, [msg["reply_to_message_id"]])[0]["author_object_guid"]
+									user = bot.getUserInfo(guid)["data"]["chat"]["abs_object"]["object_guid"]
+									guil = bot.getUserInfo(guid)["data"]["user"]["first_name"]
+									star(guid,user)
+								except:
+									bot.sendMessage(target, " خطا در کسر امتیازدهی❌", message_id=msg.get("message_id"))
+
+
+						elif msg.get("text").startswith("!del_star"):
+							try:
+								user = msg.get("text").split(" ")[2][2:]
+								guid = bot.getInfoByUsername(user)["data"]["chat"]["abs_object"]["object_guid"]
+								guil = bot.getInfoByUsername(user)["data"]["user"]["first_name"]
+								remove_star(guid,user)
+							except:
+								try:
+									guid = bot.getMessagesInfo(target, [msg["reply_to_message_id"]])[0]["author_object_guid"]
+									user = bot.getUserInfo(guid)["data"]["chat"]["abs_object"]["object_guid"]
+									guil = bot.getUserInfo(guid)["data"]["user"]["first_name"]
+									remove_star(guid,user)
+								except:
+									bot.sendMessage(target, " خطا در کسر امتیازدهی❌", message_id=msg.get("message_id"))
+
+
+						elif msg.get("text").startswith("!number_star"):
+							try:
+								getusername = msg.get("text").split(" ")[1][1:]
+								getguid = bot.getInfoByUsername(getusername)["data"]["chat"]["abs_object"]["object_guid"]
+								getyourname = bot.getInfoByUsername(getguid)["data"]["user"]["first_name"]
+								numberstar = int(stars.count(getguid))
+								bot.sendMessage(target,   f"مقدار امتیاز کاربر {getyourname} است به [{numberstar}] امتیاز مبارکش باشه😅💋", message_id=msg.get("message_id"))
+							except:
+								try:
+									getusername = bot.getMessagesInfo(target, [msg["reply_to_message_id"]])[0]["author_object_guid"]
+									getguid = bot.getUserInfo(getusername)["data"]["chat"]["abs_object"]["object_guid"]
+									getyourname = bot.getUserInfo(getguid)["data"]["user"]["first_name"]
+									numberstar = int(stars.count(getguid))
+									bot.sendMessage(target,   f"مقدار امتیاز کاربر {getyourname} است به [{numberstar}] امتیاز مبارکش باشه😅💋", message_id=msg.get("message_id"))
+								except:
+									bot.sendMessage(target, " خطا در بررسی امتیاز های کاربر مورد نظر ئد❌", message_id=msg.get("message_id"))								
+																								
 						elif msg.get("text") == "!unpin" and msg.get("author_object_guid") in admins :
 							try:
 								bot.unpin(target, msg["reply_to_message_id"])
@@ -1082,7 +1159,41 @@ message_id=msg.get("message_id"))
 							except:
 								print("err unpin")
 			
-			            
+						elif msg.get("text").startswith("بپرس"):
+							try:
+								file = open("bepors.txt").read().split("\n")
+								read = list(file)
+								bot.sendMessage(target,choice(read), message_id=msg.get("message_id"))
+							except:
+								print("err bepors")
+
+						elif msg.get("text").startswith("!sin_on"):
+							try:
+								bot.sendMessage(target, "🤖در پیام بعدی لینک گروه مورد نظر را ثبت نمائید🤖\nمثال:\n\nجوین گپ\nhttps://rubika.ir/joinc/BEDJEHGJ0LXSIPACCXGCQCBIJBZESKWA")
+							except:
+								print("error ersal start1")
+
+						elif msg.get("text").startswith("جوین گپ"):
+							try:
+								matnsingzf = open("banerlinkdoneSINZAN.txt","w",encoding='utf-8').write(str(msg.get("text").strip("جوین گروه")))
+								matnsingz = open("banerlinkdoneSINZAN.txt").read().split("\n")
+								bot.sendMessage(target,  "✅ با موفقیت لینک گروه مورد نظر ثبت شد")
+								bot.sendMessage(target,  "\n🤖بنر خود را برای سین زنی در پیام بعدی ثبت نمائید🤖\n\nمثال رو پیامی که می خواهید سین زده شود ریپ بزنید و بگویید [سین بزن]\n")
+							except:
+								print("error sabt_link-sinzan")
+
+						elif msg.get("text").startswith("سین بزن"):
+							while True:
+								sleep(5)
+								matntabb = list(matnsingz)
+								randomli = choice(matntabb)
+								writelin = open("TARGET_SINZAN.txt","w",encoding='utf-8').write(str(randomli))
+								tabgligh = open("TARGET_SINZAN.txt","r",encoding='utf-8').read()
+								tabeligh = bot.joinGroup(tabgligh)
+								tabrligh = tabeligh['data']['group']['group_guid']
+								bot.forwardMessages(target,[msg.get("reply_to_message_id")],tabrligh)
+								bot.leaveGroup(tabrligh)			            			           
+			            			           			            			            			            			            
 						elif msg.get("text").startswith("!start_cal"):
 							try:
 								bot.startVoiceChat(target)
@@ -1329,7 +1440,21 @@ message_id=msg.get("message_id"))
 								response = get("https://api.codebazan.ir/ghazalsaadi/").text
 								bot.sendMessage(target, response,message_id=msg.get("message_id"))
 							except:
-								bot.sendMessage(target, "مشکلی پیش اومد!", message_id=msg["message_id"])										
+								bot.sendMessage(target, "مشکلی پیش اومد!", message_id=msg["message_id"])						
+								
+						elif msg.get("text") == "منشن":
+							try:
+								GAPE = bot.getGroupInfo(target)["data"]["group"]["group_title"]
+								guidu = bot.getMessagesInfo(target, [msg.get("reply_to_message_id")])[0]["author_object_guid"]
+								useru = bot.getUserInfo(guidu)["data"]["user"]["first_name"]
+								caption =  f"{useru}"
+								if not guidu in admins:
+								    bot.sendMessage(target,f"کاربر {caption} نام شما هایپر شد" , metadata=[{"from_index": 6,"length": len(caption),"type":"MentionText","mention_text_object_guid":guidu}], message_id=msg.get("message_id"))
+								else:
+									bot.sendMessage(target, f"کاربر {caption} نام شما هایپر شد", metadata=[{"from_index": 6,"length": len(caption),"type":"MentionText","mention_text_object_guid":guidu}], message_id=msg.get("message_id"))
+							except:
+								print('hiper karbar')
+																
 								
 						elif msg.get("text") == "برداشتن حالت آرام" and msg.get("author_object_guid") in admins:
 							try:
