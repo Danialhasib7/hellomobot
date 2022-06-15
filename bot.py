@@ -1193,14 +1193,12 @@ message_id=msg.get("message_id"))
 							except:
 								bot.sendMessage(target, "متاسفانه تو ارسال مشکلی پیش اومد!", message_id=msg["message_id"])
 							
-						elif msg.get("text").startswith("دانستنی") or msg.get("text").startswith("!danestani"):
-								try:
-									response = get("http://api.codebazan.ir/danestani/pic").content
-									with open("shot.jpg","wb") as shot: shot.write(response)
-									bot.sendPhoto(target, "./shot.jpg", [650,370], caption="@mobomation", message_id=msg["message_id"])
-									os.remove('./shot.jpg')
-								except:
-									print("err cbz danesh")
+						elif msg.get("text").startswith("!danestani") or msg.get("text").startswith("دانستنی"):
+							try:
+								response = get("http://api.codebazan.ir/danestani/").text
+								bot.sendMessage(target, response,message_id=msg.get("message_id"))
+							except:
+								bot.sendMessage(target, "متاسفانه تو ارسال مشکلی پیش اومد!", message_id=msg["message_id"])
 									
 								
 						elif msg.get("text").startswith("پ ن پ") or msg.get("text").startswith("!pa_na_pa") or msg.get("text").startswith("په نه په"):
