@@ -27,7 +27,7 @@ from PIL import Image
  
 bot = Bot("AppName", auth="tnuqjhohmjbzmmruqdcvdxefxztxcmui")
  
-target = "g0BWelu0b8fb490ec311c8992e309887"
+target = "g0BNrb30de2e514d459a848bbba73124"
 
 channell = "c0zJzy0e2c6e5793fd68f54ec777cda4"
 
